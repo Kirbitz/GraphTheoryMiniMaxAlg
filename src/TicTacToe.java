@@ -85,9 +85,9 @@ public class TicTacToe {
 	 * @param xLocation - the last x location that a marker was placed
 	 * @param yLocation - the last y location that a marker was placed
 	 * @param minimaxCheck - the check value to see if the minimax won or not
-	 * @return 1 - if minimax won, -1 - if player won, 0 - if the board is filled and no one won, minimaxCheck - if the game is not finished
+	 * @return 1 - if X won, -1 - if O won, 0 - if the board is filled and no one won, currentPlayer - if the game is not finished
 	 */
-	public int isWinner(int xLocation, int yLocation, char minimaxCheck) {
+	public int isWinner(int xLocation, int yLocation) {
 		int row = 0, col = 0, diag = 0, rDiag = 0;
 		//Loops through the last placed marker location
 		for(int i = 0; i < gameBoard.length; i++) {
@@ -105,7 +105,7 @@ public class TicTacToe {
 		//Checks if 3 current player markers are in a row then determines the marker that won
 		if(row == gameBoard.length || col == gameBoard.length || diag == gameBoard.length || rDiag == gameBoard.length) {
 			//Checks if the minimax alg won or the player won
-			if(currentPlayer == minimaxCheck)
+			if(currentPlayer == 'X')
 				return 1;
 			else
 				return -1;
@@ -122,7 +122,7 @@ public class TicTacToe {
 			currentPlayer = 'X';
 		
 		//Returns minimaxCheck to continue the game
-		return minimaxCheck;
+		return currentPlayer;
 	}
 	
 	public String toString() {
