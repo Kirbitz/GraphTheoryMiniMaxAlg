@@ -216,7 +216,7 @@ public class Setup extends BorderPane {
 	}
 	
 	/*
-	 * Function to restart the TicTacToe board and hide the reset button and win text
+	 * Function to restart the TicTacToe board, re-enabling the buttons and hide the reset button and win text
 	 */
 	private void restart() {
 		TTT = new TicTacToe();
