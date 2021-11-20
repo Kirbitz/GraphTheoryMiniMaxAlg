@@ -1,10 +1,13 @@
 package application;
+
+import java.util.LinkedList;
+
 /**
  * 
  */
 
 /**
- * TicTacToe class which keeps track of a tictactoe game board and determines 
+ * TicTacToe class which keeps track of a TicTacToe game board and determines 
  * the winner of the game and if a marker can be placed in the board
  * @author Tyler Marefke, Tiernan Meyer
  * @date 11/7/2021
@@ -14,7 +17,7 @@ public class TicTacToe {
 	private char[][] gameBoard = new char[3][3];
 	private char currentPlayer;
 	private int numberOfOpenSlots;
-	
+	private LinkedList<Coordinate> coordinates;
 	
 	/**
 	 * Default constructor for the TicTacToe class
@@ -24,13 +27,15 @@ public class TicTacToe {
 	public TicTacToe() {
 		this.currentPlayer = 'X';
 		this.numberOfOpenSlots = 9;
+		this.coordinates = new LinkedList<Coordinate>();
 		for(int i = 0; i < gameBoard.length; i++) {
 			for(int j = 0; j < gameBoard[i].length; j++) {
 				this.gameBoard[i][j] = ' ';
+				this.coordinates.add(new Coordinate(i, j));
 			}
 		}
 	}
-	
+
 	/**
 	 * Copy constructor for the TicTacToe class
 	 * Copies the current player, numberOfOpenSlots, and gameBoard from other
@@ -38,11 +43,20 @@ public class TicTacToe {
 	public TicTacToe(TicTacToe other) {
 		this.currentPlayer = other.currentPlayer;
 		this.numberOfOpenSlots = other.numberOfOpenSlots;
+		this.coordinates = new LinkedList<Coordinate>(new LinkedList<Coordinate>(other.coordinates));
 		for(int i = 0; i < gameBoard.length; i++) {
 			for(int j = 0; j < gameBoard[i].length; j++) {
 				this.gameBoard[i][j] = other.gameBoard[i][j];
 			}
 		}
+	}
+	
+	/**
+	 * Returns a list of the available coordinates
+	 * @return coordinates - the list of available coordinates
+	 */
+	public LinkedList<Coordinate> getCoordinates() {
+		return coordinates;
 	}
 	
 	/**
@@ -59,6 +73,14 @@ public class TicTacToe {
 	public char getCurrentPlayer() {
 		return currentPlayer;
 	}
+	
+	/**
+	 * Sets the current player to the passed in value
+	 * @param player - the player to set
+	 */
+	public void setCurrentPlayer(char player) {
+		currentPlayer = player;
+	}
 	/**
 	 * Returns the number of available slots on the TicTacToe board
 	 * @return numberOfOpenSlots - the number of available slots in the TicTacToe board
@@ -72,11 +94,35 @@ public class TicTacToe {
 	 * @return true - if the marker was successfully place, false - if the marker failed to be placed
 	 */
 	public boolean placeMarkerInBoard(int xLocation, int yLocation) {
-		if(xLocation < 0 || xLocation > gameBoard.length - 1 || yLocation < 0 || yLocation > gameBoard.length - 1 || gameBoard[yLocation][xLocation] != ' ')
+		if(xLocation < 0 || xLocation > gameBoard.length - 1 || yLocation < 0 || yLocation > gameBoard.length - 1 || gameBoard[xLocation][yLocation] != ' ')
 			return false;
 		else {
-			gameBoard[yLocation][xLocation] = currentPlayer;
+			gameBoard[xLocation][yLocation] = currentPlayer;
 			numberOfOpenSlots--;
+			for(Coordinate coordinate : coordinates) {
+				if(coordinate.getxLocation() == xLocation && coordinate.getyLocation() == yLocation) {
+					coordinates.remove(coordinate);
+					break;
+				}
+			}
+			return true;
+		}
+	}
+	
+	/**
+	 * Removes a marker from the board at the x and y location also adds coordinate back into linked list at pos
+	 * @param xLocation - the x location to remove from
+	 * @param yLocation - the y location to remove from
+	 * @param pos - the position to add the coordinate back into
+	 * @return if the removal was a success
+	 */
+	public boolean removeMarkerFromBoard(int xLocation, int yLocation, int pos) {
+		if(xLocation < 0 || xLocation > gameBoard.length - 1 || yLocation < 0 || yLocation > gameBoard.length - 1 || gameBoard[xLocation][yLocation] == ' ')
+			return false;
+		else {
+			gameBoard[xLocation][yLocation] = ' ';
+			numberOfOpenSlots++;
+			coordinates.add(pos, new Coordinate(xLocation, yLocation));
 			return true;
 		}
 	}
@@ -93,9 +139,9 @@ public class TicTacToe {
 		//Loops through the last placed marker location
 		for(int i = 0; i < gameBoard.length; i++) {
 			//if statements check if the position is equal to the current marker and increments the appropriate value
-			if(gameBoard[yLocation][i] == currentPlayer)
+			if(gameBoard[xLocation][i] == currentPlayer)
 				row++;
-			if(gameBoard[i][xLocation] == currentPlayer)
+			if(gameBoard[i][yLocation] == currentPlayer)
 				col++;
 			if(gameBoard[i][i] == currentPlayer)
 				diag++;
@@ -116,16 +162,23 @@ public class TicTacToe {
 		if(numberOfOpenSlots == 0)
 			return 0;
 		
-		//Changes the marker from X to O and O to X
-		if(currentPlayer == 'X')
-			currentPlayer = 'O';
-		else
-			currentPlayer = 'X';
-		
 		//Returns minimaxCheck to continue the game
 		return currentPlayer;
 	}
 	
+	/**
+	 * Changes the current player from X to O and O to X
+	 */
+	public void changePlayer() {
+		if(currentPlayer == 'X')
+			currentPlayer = 'O';
+		else
+			currentPlayer = 'X';
+	}
+	
+	/**
+	 * Command line form of the board
+	 */
 	public String toString() {
 		String result = "";
 		for(int i = 0; i < gameBoard.length; i++) {
