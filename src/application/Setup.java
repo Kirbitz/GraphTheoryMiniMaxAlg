@@ -23,12 +23,12 @@ public class Setup extends BorderPane {
 	private AnchorPane startPane, gamePane;
 	private Text start, gameText;
 	private Font startFont, buttonFont;
-	private Button startButton, restart;
+	private Button xButton, oButton, xRestart, oRestart;
 	private Button[][] buttonArray = new Button[3][3];
 	private Stage window;
 	private Scene gameScreen;
 	private BorderPane game;
-	private char text;
+	private char text, notComputerTurn;
 	private String string;
 	private TicTacToe TTT;
 	private int win;
@@ -51,19 +51,26 @@ public class Setup extends BorderPane {
 	private void setStartScreen() {
 		try {
 			startPane = new AnchorPane();
-			start = new Text("Click the button\nbelow to start");
+			start = new Text("Chose your turn\nbelow to start");
 			startFont = new Font("Courier", 60);
 			start.setFont(startFont);
-			startButton = new Button("START");
-			startButton.setFont(startFont);
-			startButton.setOnAction(this::processAction);
-			startButton.setStyle("-fx-background-color: white;" + "-fx-border-color: black;"
+			xButton = new Button("X");
+			xButton.setFont(startFont);
+			xButton.setOnAction(this::processAction);
+			xButton.setStyle("-fx-background-color: white;" + "-fx-border-color: black;"
 					+ "-fx-border-width: 10;");
-			startPane.getChildren().addAll(start, startButton);
+			oButton = new Button("O");
+			oButton.setFont(startFont);
+			oButton.setOnAction(this::processAction);
+			oButton.setStyle("-fx-background-color: white;" + "-fx-border-color: black;"
+					+ "-fx-border-width: 10;");
+			startPane.getChildren().addAll(start, xButton, oButton);
 			AnchorPane.setTopAnchor(start, 250.0);
 			AnchorPane.setLeftAnchor(start, 250.0);
-			AnchorPane.setBottomAnchor(startButton, 150.0);
-			AnchorPane.setLeftAnchor(startButton, 320.0);
+			AnchorPane.setBottomAnchor(xButton, 100.0);
+			AnchorPane.setBottomAnchor(oButton, 100.0);
+			AnchorPane.setLeftAnchor(xButton, 250.0);
+			AnchorPane.setRightAnchor(oButton, 250.0);
 			setCenter(startPane);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -78,17 +85,25 @@ public class Setup extends BorderPane {
 			gamePane = new AnchorPane();
 			gameText = new Text("");
 			gameText.setFont(startFont);
-			restart = new Button("Restart");
-			restart.setFont(startFont);
-			restart.setOnAction(this::processAction);
-			restart.setStyle("-fx-background-color: white;" + "-fx-border-color: black;"
+			xRestart = new Button("Restart as X");
+			xRestart.setFont(startFont);
+			xRestart.setOnAction(this::processAction);
+			xRestart.setStyle("-fx-background-color: white;" + "-fx-border-color: black;"
 					+ "-fx-border-width: 10;");
-			restart.setVisible(false);
-			gamePane.getChildren().addAll(gameText, restart);
+			xRestart.setVisible(false);
+			oRestart = new Button("Restart as O");
+			oRestart.setFont(startFont);
+			oRestart.setOnAction(this::processAction);
+			oRestart.setStyle("-fx-background-color: white;" + "-fx-border-color: black;"
+					+ "-fx-border-width: 10;");
+			oRestart.setVisible(false);
+			gamePane.getChildren().addAll(gameText, xRestart, oRestart);
 			AnchorPane.setTopAnchor(gameText, 10.0);
 			AnchorPane.setLeftAnchor(gameText, 340.0);
-			AnchorPane.setBottomAnchor(restart, 10.0);
-			AnchorPane.setLeftAnchor(restart, 320.0);
+			AnchorPane.setBottomAnchor(xRestart, 10.0);
+			AnchorPane.setLeftAnchor(xRestart, 25.0);
+			AnchorPane.setBottomAnchor(oRestart, 10.0);
+			AnchorPane.setRightAnchor(oRestart, 25.0);
 			double heightSpacing = 175.0;
 			for (int i = 0; i < 3; i++) {
 				double widthSpacing = 175.0;
@@ -131,11 +146,24 @@ public class Setup extends BorderPane {
 	 * Handles all the button presses
 	 */
 	private void processAction(ActionEvent event) {
-		if (event.getSource() == startButton) {
+		if (event.getSource() == xButton) {
 			setGameScreen();
+			notComputerTurn = 'X';
 		}
-		if (event.getSource() == restart) {
+		if (event.getSource() == oButton) {
+			setGameScreen();
+			notComputerTurn = 'O';
+			computerMoves(true);
+			TTT.changePlayer();
+		}
+		if (event.getSource() == xRestart) {
 			restart();
+		}
+		if (event.getSource() == oRestart) {
+			restart();
+			notComputerTurn = 'O';
+			computerMoves(true);
+			TTT.changePlayer();
 		}
 		/*
 		 * Checks to see which button was pressed in the game board
@@ -203,7 +231,7 @@ public class Setup extends BorderPane {
 		
 		TTT.changePlayer();
 		
-		if(TTT.getCurrentPlayer() == 'X')
+		if(TTT.getCurrentPlayer() == notComputerTurn)
 			computerMoves(true);
 		else
 			computerMoves(false);
@@ -221,7 +249,8 @@ public class Setup extends BorderPane {
 					}
 				}
 			}
-			restart.setVisible(true);
+			xRestart.setVisible(true);
+			oRestart.setVisible(true);
 		}
 	}
 	
@@ -237,7 +266,8 @@ public class Setup extends BorderPane {
 				buttonArray[i][j].setText("");
 			}
 		}
-		restart.setVisible(false);
+		xRestart.setVisible(false);
+		oRestart.setVisible(false);
 		gameText.setText("");
 		isWin = false;
 	}
@@ -369,6 +399,54 @@ public class Setup extends BorderPane {
 		
 		//Places the best move for the computer into the board
 		TTT.placeMarkerInBoard(xLocation, yLocation);
+		
+		//Updates the GUI for the computers moves
+		if (xLocation == -1 || yLocation == -1) {
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					if (buttonArray[i][j].isDisabled() == false) {
+						buttonArray[i][j].setDisable(true);
+					}
+				}
+				xRestart.setVisible(true); 
+				oRestart.setVisible(true);
+			}
+			} else {
+				buttonArray[xLocation][yLocation].setDisable(true);
+				text = TTT.getCurrentPlayer();
+				string = "";
+				string += text;
+				buttonArray[xLocation][yLocation].setText(string);
+				if (text == 'X') {
+					buttonArray[xLocation][yLocation].setStyle("-fx-background-color: red;");
+				} else {
+
+					buttonArray[xLocation][yLocation].setStyle("-fx-background-color: blue;");
+				}
+				win = TTT.isWinner(xLocation, yLocation);
+				if (win == 1) {
+					gameText.setText("X Wins!");
+					isWin = true;
+				} else if (win == -1) {
+					gameText.setText("O Wins!");
+					isWin = true;
+				}
+				else if (win == 0) {
+					gameText.setText("Draw!");
+					isWin = true;
+				}
+				if (isWin == true) {
+					for (int i = 0; i < 3; i++) {
+						for (int j = 0; j < 3; j++) {
+							if (buttonArray[i][j].isDisabled() == false) {
+								buttonArray[i][j].setDisable(true);
+							}
+						}
+					}
+					xRestart.setVisible(true);
+					oRestart.setVisible(true);
+			}
+		}
 		
 		//Prints board the placement for testing purposes
 		System.out.println(TTT);
