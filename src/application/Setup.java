@@ -231,7 +231,7 @@ public class Setup extends BorderPane {
 		
 		TTT.changePlayer();
 		
-		if(TTT.getCurrentPlayer() == notComputerTurn)
+		if(TTT.getCurrentPlayer() == 'X')
 			computerMoves(true);
 		else
 			computerMoves(false);
