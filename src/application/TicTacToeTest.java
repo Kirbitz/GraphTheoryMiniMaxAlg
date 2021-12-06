@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 class TicTacToeTest {
 
+	//TODO
+	//Tests need to be rewritten as code has changed
 	@Test
 	/**
 	 * Tests the tictactoe is constructing properly with currentPlayer <- X,
