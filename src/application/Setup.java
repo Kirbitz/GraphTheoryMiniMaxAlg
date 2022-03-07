@@ -4,13 +4,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.text.Font;
+
 import javafx.event.ActionEvent;
-import javafx.geometry.Pos;
 
 /**
  * Setup class which sets up the Graphic User Interface of the TicTacToe program
@@ -28,12 +26,9 @@ public class Setup extends BorderPane {
 	private Stage window;
 	private Scene gameScreen;
 	private BorderPane game;
-	private char text, notComputerTurn;
+	private char text;
 	private String string;
 	private TicTacToe TTT;
-	private int win;
-	private boolean isWin = false;
-
 	
 	/*
 	 * Sets up the GUI
@@ -51,7 +46,7 @@ public class Setup extends BorderPane {
 	private void setStartScreen() {
 		try {
 			startPane = new AnchorPane();
-			start = new Text("Chose your turn\nbelow to start");
+			start = new Text("Choose your turn\nbelow to start");
 			startFont = new Font("Courier", 60);
 			start.setFont(startFont);
 			xButton = new Button("X");
@@ -148,110 +143,98 @@ public class Setup extends BorderPane {
 	private void processAction(ActionEvent event) {
 		if (event.getSource() == xButton) {
 			setGameScreen();
-			notComputerTurn = 'X';
 		}
 		if (event.getSource() == oButton) {
 			setGameScreen();
-			notComputerTurn = 'O';
-			computerMoves(true);
-			TTT.changePlayer();
+			int coordLocation = MiniMaxAlg.computerMoves(true, TTT);
+			placeMarkerInGUIBoard(coordLocation);
 		}
 		if (event.getSource() == xRestart) {
 			restart();
 		}
 		if (event.getSource() == oRestart) {
 			restart();
-			notComputerTurn = 'O';
-			computerMoves(true);
-			TTT.changePlayer();
+			int coordLocation = MiniMaxAlg.computerMoves(true, TTT);
+			placeMarkerInGUIBoard(coordLocation);
 		}
 		/*
 		 * Checks to see which button was pressed in the game board
 		 */
-		if (event.getSource() == buttonArray[0][0]) {
-			buttonArrayFunction(0,0);
-		}
-		else if (event.getSource() == buttonArray[0][1]) {
-			buttonArrayFunction(0,1);
-		}
-		else if (event.getSource() == buttonArray[0][2]) {
-			buttonArrayFunction(0,2);
-		}
-		else if (event.getSource() == buttonArray[1][0]) {
-			buttonArrayFunction(1,0);
-		}
-		else if (event.getSource() == buttonArray[1][1]) {
-			buttonArrayFunction(1,1);
-		}
-		else if (event.getSource() == buttonArray[1][2]) {
-			buttonArrayFunction(1,2);
-		}
-		else if (event.getSource() == buttonArray[2][0]) {
-			buttonArrayFunction(2,0);
-		}
-		else if (event.getSource() == buttonArray[2][1]) {
-			buttonArrayFunction(2,1);
-		}
-		else if (event.getSource() == buttonArray[2][2]) {
-			buttonArrayFunction(2,2);
-		}
+		for (int i = 0; i < 3; i++) {
+      for(int j = 0; j < 3; j++) {
+        if(event.getSource() == buttonArray[i][j])
+          buttonArrayFunction(i, j);
+      }
+    }
 	}
 	
 	/*
 	 * Function to communicate with TicTacToe.java in coordination with the GUI TicTacToe board
 	 */
 	private void buttonArrayFunction(int x, int y) {
-		buttonArray[x][y].setDisable(true);
-		text = TTT.getCurrentPlayer();
-		string = "";
-		string += text;
-		buttonArray[x][y].setText(string);
-		if (text == 'X') {
-			buttonArray[x][y].setStyle("-fx-background-color: red;");
-		} else {
-
-			buttonArray[x][y].setStyle("-fx-background-color: blue;");
-		}
-		TTT.placeMarkerInBoard(x, y);
-		/*
-		 * Check to see if a winner was found
-		 */
-		win = TTT.isWinner(x, y);
-		if (win == 1) {
-			gameText.setText("X Wins!");
-			isWin = true;
-		} else if (win == -1) {
-			gameText.setText("O Wins!");
-			isWin = true;
-		}
-		else if (win == 0) {
-			gameText.setText("Draw!");
-			isWin = true;
-		}
 		
-		TTT.changePlayer();
+		placeMarkerInGUIBoard(((3*x) + y));
+		
+		int coordLocation = -1;
 		
 		if(TTT.getCurrentPlayer() == 'X')
-			computerMoves(true);
+			coordLocation = MiniMaxAlg.computerMoves(true, TTT);
 		else
-			computerMoves(false);
-		
-		TTT.changePlayer();
-		
-		/*
-		 * Disables buttons on TicTacToe board and reveals the restart button
-		 */
-		if (isWin == true) {
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					if (buttonArray[i][j].isDisabled() == false) {
-						buttonArray[i][j].setDisable(true);
-					}
-				}
-			}
-			xRestart.setVisible(true);
-			oRestart.setVisible(true);
-		}
+			coordLocation = MiniMaxAlg.computerMoves(false, TTT);
+		placeMarkerInGUIBoard(coordLocation);
+	}
+	
+	/**
+	 * Places the X or O marker within the GUI interface of the TicTacToe board
+	 * @param xLocation
+	 * @param yLocation
+	 */
+	public void placeMarkerInGUIBoard(int coordLocation) {
+	  if(coordLocation == -1)
+	    return;
+	  int xLocation = TTT.getCoordinates().get(coordLocation).getxLocation();
+	  int yLocation = TTT.getCoordinates().get(coordLocation).getyLocation();
+	  buttonArray[xLocation][yLocation].setDisable(true);
+    text = TTT.getCurrentPlayer();
+    string = "";
+    string += text;
+    buttonArray[xLocation][yLocation].setText(string);
+    if (text == 'X') {
+      buttonArray[xLocation][yLocation].setStyle("-fx-background-color: red;");
+    } else {
+
+      buttonArray[xLocation][yLocation].setStyle("-fx-background-color: blue;");
+    }
+    TTT.placeMarkerInBoard(coordLocation, xLocation, yLocation);
+    /*
+     * Check to see if a winner was found
+     */
+    int win = TTT.isWinner(xLocation, yLocation);
+    if (win == 1) {
+      gameText.setText("X Wins!");
+    } else if (win == -1) {
+      gameText.setText("O Wins!");
+    }
+    else if (win == 0) {
+      gameText.setText("Draw!");
+    }
+    
+    TTT.changePlayer();
+    
+    /*
+     * Disables buttons on TicTacToe board and reveals the restart button
+     */
+    if (win >= -1 && win <= 1) {
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (!buttonArray[i][j].isDisabled()) {
+            buttonArray[i][j].setDisable(true);
+          }
+        }
+      }
+      xRestart.setVisible(true);
+      oRestart.setVisible(true);
+    }
 	}
 	
 	/*
@@ -269,187 +252,5 @@ public class Setup extends BorderPane {
 		xRestart.setVisible(false);
 		oRestart.setVisible(false);
 		gameText.setText("");
-		isWin = false;
-	}
-	
-	/**
-	 * Minimax algorithm: This algorithm determines the optimal move for the current player, which
-	 * 		assumes that the other player is playing optimally
-	 * @param manipulatingBoard - a copy of the game board
-	 * @param xLocation - the last x location placed in the board
-	 * @param yLocation - the last y location placed in the board
-	 * @param maximizingPlayer - determines if the current player is maximizing or minimizing
-	 * @param alpha - the maximizing indicator for alpha-beta pruning
-	 * @param beta - the minimizing indicator for alpha-beta pruning
-	 * @return a maximizing or minimizing value
-	 */
-	private int miniMaxAlg(TicTacToe manipulatingBoard, int xLocation, int yLocation, boolean maximizingPlayer, int alpha, int beta) {
-		//Runs method to check if a winner has been determined or the board has been filled
-		int winnerOrGameEnd = manipulatingBoard.isWinner(xLocation, yLocation);
-		//Returns the static value of the current board state
-		if(winnerOrGameEnd >= -1 && winnerOrGameEnd <= 1)
-			return winnerOrGameEnd;
-		
-		//Runs if the current player is maximizing
-		if(maximizingPlayer) {
-			//Sets the best move to a low count
-			int bestMax = -1000;
-			
-			//Loops through available moves in the board
-			for(int i = 0; i < manipulatingBoard.getNumberOfOpenSlots(); i++) {
-				
-				//Sets the maximizing player to be X
-				manipulatingBoard.setCurrentPlayer('X');
-				Coordinate current = manipulatingBoard.getCoordinates().get(i);
-				int tempX = current.getxLocation(), tempY = current.getyLocation();
-				manipulatingBoard.placeMarkerInBoard(tempX, tempY);
-				
-				//Runs the minimax alg with minimizing player's turn and saves the maximum result
-				bestMax = Math.max(bestMax, miniMaxAlg(manipulatingBoard, tempX, tempY, false, alpha, beta));
-				
-				//Calculates the new alpha for pruning
-				alpha = Math.max(alpha, bestMax);
-				
-				//removes the last placed marker from the board
-				manipulatingBoard.removeMarkerFromBoard(tempX, tempY, i);
-				
-				//Prunes branches if a better min exists
-				if(beta <= alpha)
-					break;
-			}
-			return bestMax;
-		}else {
-			//Sets the best move to a high count
-			int bestMin = 1000;
-			
-			//Loops through the available moves in the board
-			for(int i = 0; i < manipulatingBoard.getNumberOfOpenSlots(); i++) {
-				
-				//Sets the minimizing player to be O
-				manipulatingBoard.setCurrentPlayer('O');
-				
-				//Stores the current coordinate from the available coordinates
-				Coordinate current = manipulatingBoard.getCoordinates().get(i);
-				int tempX = current.getxLocation(), tempY = current.getyLocation();
-				manipulatingBoard.placeMarkerInBoard(tempX, tempY);
-				
-				//Runs the minimax alg with maximizing player's turn and saves the minimum result
-				bestMin = Math.min(bestMin, miniMaxAlg(manipulatingBoard, tempX, tempY, true, alpha, beta));
-				
-				//Calculates the new beta for pruning
-				beta = Math.min(beta, bestMin);
-				
-				//Removes the last placed marker from the board
-				manipulatingBoard.removeMarkerFromBoard(tempX, tempY, i);
-				
-				//Prunes branches if a better max exists
-				if(beta <= alpha)
-					break;
-			}
-			return bestMin;
-		}
-	}
-	
-	/**
-	 * Determines what the most optimal move is for the computer player and places it into the board
-	 * @param maximizingPlayer - determines whether the computer is maximizing or not
-	 */
-	private void computerMoves(boolean maximizingPlayer) {
-		TicTacToe manipulatingBoard = new TicTacToe(TTT);
-		int xLocation = -1, yLocation = -1, best = 0;
-		//Sets the value of best based on whether the computer is trying to minimize or maximize
-		if(maximizingPlayer)
-			best = -1000;
-		else
-			best = 1000;
-		
-		//Loops through the possible options for the computer player
-		for (int i = 0; i < manipulatingBoard.getNumberOfOpenSlots(); i++) {
-			//Sets current player to O or X depending on if they are minimizing or maximizing
-			if(maximizingPlayer)
-				manipulatingBoard.setCurrentPlayer('X');
-			else
-				manipulatingBoard.setCurrentPlayer('O');
-
-			//Stores the current coordinates to test in the game
-			Coordinate current = manipulatingBoard.getCoordinates().get(i);
-			manipulatingBoard.placeMarkerInBoard(current.getxLocation(), current.getyLocation());
-			
-			//Checks if the move is optimal by running through the minimax algorithm
-			int miniMaxVal = miniMaxAlg(manipulatingBoard, current.getxLocation(), current.getyLocation(), !maximizingPlayer, -1000, 1000);
-			
-			//Changes players most optimal move based on current move
-			if(maximizingPlayer) {
-				if(miniMaxVal > best) {
-					best = miniMaxVal;
-					xLocation = current.getxLocation();
-					yLocation = current.getyLocation();
-				}
-			}else {
-				if(miniMaxVal < best) {
-					best = miniMaxVal;
-					xLocation = current.getxLocation();
-					yLocation = current.getyLocation();
-				}
-			}
-			
-			//Removes marker from board in order to test next marker
-			manipulatingBoard.removeMarkerFromBoard(current.getxLocation(), current.getyLocation(), i);
-		}
-		
-		//Places the best move for the computer into the board
-		TTT.placeMarkerInBoard(xLocation, yLocation);
-		
-		//Updates the GUI for the computers moves
-		if (xLocation == -1 || yLocation == -1) {
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					if (buttonArray[i][j].isDisabled() == false) {
-						buttonArray[i][j].setDisable(true);
-					}
-				}
-				xRestart.setVisible(true); 
-				oRestart.setVisible(true);
-			}
-			} else {
-				buttonArray[xLocation][yLocation].setDisable(true);
-				text = TTT.getCurrentPlayer();
-				string = "";
-				string += text;
-				buttonArray[xLocation][yLocation].setText(string);
-				if (text == 'X') {
-					buttonArray[xLocation][yLocation].setStyle("-fx-background-color: red;");
-				} else {
-
-					buttonArray[xLocation][yLocation].setStyle("-fx-background-color: blue;");
-				}
-				win = TTT.isWinner(xLocation, yLocation);
-				if (win == 1) {
-					gameText.setText("X Wins!");
-					isWin = true;
-				} else if (win == -1) {
-					gameText.setText("O Wins!");
-					isWin = true;
-				}
-				else if (win == 0) {
-					gameText.setText("Draw!");
-					isWin = true;
-				}
-				if (isWin == true) {
-					for (int i = 0; i < 3; i++) {
-						for (int j = 0; j < 3; j++) {
-							if (buttonArray[i][j].isDisabled() == false) {
-								buttonArray[i][j].setDisable(true);
-							}
-						}
-					}
-					xRestart.setVisible(true);
-					oRestart.setVisible(true);
-			}
-		}
-		
-		//Prints board the placement for testing purposes
-		System.out.println(TTT);
-		System.out.println(xLocation + " " + yLocation);
 	}
 }
