@@ -1,6 +1,6 @@
 package application;
 
-import java.util.LinkedList;
+import java.util.HashMap;
 
 /**
  * 
@@ -17,7 +17,7 @@ public class TicTacToe {
 	private char[][] gameBoard = new char[3][3];
 	private char currentPlayer;
 	private int numberOfOpenSlots;
-	private LinkedList<Coordinate> coordinates;
+	private HashMap<Integer, Coordinate> coordinates;
 	
 	/**
 	 * Default constructor for the TicTacToe class
@@ -27,11 +27,11 @@ public class TicTacToe {
 	public TicTacToe() {
 		this.currentPlayer = 'X';
 		this.numberOfOpenSlots = 9;
-		this.coordinates = new LinkedList<Coordinate>();
+		this.coordinates = new HashMap<Integer, Coordinate>();
 		for(int i = 0; i < gameBoard.length; i++) {
 			for(int j = 0; j < gameBoard[i].length; j++) {
 				this.gameBoard[i][j] = ' ';
-				this.coordinates.add(new Coordinate(i, j));
+				this.coordinates.put((3*i) + j, new Coordinate(i, j));
 			}
 		}
 	}
@@ -43,7 +43,7 @@ public class TicTacToe {
 	public TicTacToe(TicTacToe other) {
 		this.currentPlayer = other.currentPlayer;
 		this.numberOfOpenSlots = other.numberOfOpenSlots;
-		this.coordinates = new LinkedList<Coordinate>(new LinkedList<Coordinate>(other.coordinates));
+		this.coordinates = new HashMap<Integer, Coordinate>(new HashMap<Integer, Coordinate>(other.coordinates));
 		for(int i = 0; i < gameBoard.length; i++) {
 			for(int j = 0; j < gameBoard[i].length; j++) {
 				this.gameBoard[i][j] = other.gameBoard[i][j];
@@ -51,11 +51,20 @@ public class TicTacToe {
 		}
 	}
 	
+	/*
+	 * Prints commandline data for the hashmap with key and value placements
+	 */
+	public void printHash() {
+	  for(int i : coordinates.keySet()) {
+	    System.out.println(i + " " + coordinates.get(i));
+	  }
+	}
+	
 	/**
 	 * Returns a list of the available coordinates
 	 * @return coordinates - the list of available coordinates
 	 */
-	public LinkedList<Coordinate> getCoordinates() {
+	public HashMap<Integer, Coordinate> getCoordinates() {
 		return coordinates;
 	}
 	
@@ -93,18 +102,13 @@ public class TicTacToe {
 	 * Places the marker of the current player into the game board
 	 * @return true - if the marker was successfully place, false - if the marker failed to be placed
 	 */
-	public boolean placeMarkerInBoard(int xLocation, int yLocation) {
+	public boolean placeMarkerInBoard(int coordLocation, int xLocation, int yLocation) {
 		if(xLocation < 0 || xLocation > gameBoard.length - 1 || yLocation < 0 || yLocation > gameBoard.length - 1 || gameBoard[xLocation][yLocation] != ' ')
 			return false;
 		else {
 			gameBoard[xLocation][yLocation] = currentPlayer;
 			numberOfOpenSlots--;
-			for(Coordinate coordinate : coordinates) {
-				if(coordinate.getxLocation() == xLocation && coordinate.getyLocation() == yLocation) {
-					coordinates.remove(coordinate);
-					break;
-				}
-			}
+			coordinates.remove(coordLocation);
 			return true;
 		}
 	}
@@ -116,13 +120,13 @@ public class TicTacToe {
 	 * @param pos - the position to add the coordinate back into
 	 * @return if the removal was a success
 	 */
-	public boolean removeMarkerFromBoard(int xLocation, int yLocation, int pos) {
+	public boolean removeMarkerFromBoard(int coordLocation, int xLocation, int yLocation) {
 		if(xLocation < 0 || xLocation > gameBoard.length - 1 || yLocation < 0 || yLocation > gameBoard.length - 1 || gameBoard[xLocation][yLocation] == ' ')
 			return false;
 		else {
 			gameBoard[xLocation][yLocation] = ' ';
 			numberOfOpenSlots++;
-			coordinates.add(pos, new Coordinate(xLocation, yLocation));
+			coordinates.put(coordLocation, new Coordinate(xLocation, yLocation));
 			return true;
 		}
 	}
