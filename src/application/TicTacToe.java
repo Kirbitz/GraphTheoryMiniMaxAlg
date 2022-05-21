@@ -88,7 +88,10 @@ public class TicTacToe {
 	 * @param player - the player to set
 	 */
 	public void setCurrentPlayer(char player) {
-		currentPlayer = player;
+	  if(player == 'O')
+	    currentPlayer = 'O';
+	  else
+	    currentPlayer = 'X';
 	}
 	/**
 	 * Returns the number of available slots on the TicTacToe board
